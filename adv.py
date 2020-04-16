@@ -80,7 +80,8 @@ def find_shortest_path():
         player.current_room = starting_room
         print("reset")
         if return_from_room > 0:
-            path += path[return_from_room - 1::-1]
+            # These need to be converted to their opposite directions
+            path += [opposite_direction[x] for x in path[return_from_room - 1::-1]]
         paths[exit] = path
         repeated_rooms[exit] = return_from_room
         
@@ -95,8 +96,8 @@ def find_shortest_path():
     path += paths[longest_direction][:-repeated_rooms[direction]]
     return path
 
-print(find_shortest_path())
-traversal_path = []
+traversal_path = find_shortest_path()
+print(traversal_path)
 
 
 
