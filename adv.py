@@ -35,7 +35,8 @@ def find_shortest_path():
     paths = {}
     repeated_rooms = {}
     starting_room = player.current_room
-    for exit in player.current_room.get_exits():
+    exits = player.current_room.get_exits()
+    for exit in exits:
         print(exit)
         rooms = [player.current_room.id]
         path = [exit]
@@ -58,6 +59,10 @@ def find_shortest_path():
                 # You've looped back
                 # Go back to start from there
                 return_from_room = rooms.index(room_id)
+                # Since we know we've made it back to the start,
+                # since this will run recursively at every fork,
+                # we don't need to check the loop the other way around
+                exits.remove(opposite_direction[forward])
                 forward = None
                 break
             else:
