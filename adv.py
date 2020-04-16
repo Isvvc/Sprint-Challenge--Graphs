@@ -44,7 +44,10 @@ def find_shortest_path():
 
         # Since with test_loop we know there are no more forks,
         # keep going forward until you reach the end
-        forward = player.current_room.get_exits()[0]
+        directions = player.current_room.get_exits()
+        if opposite_direction[exit] in directions:
+            directions.remove(opposite_direction[exit])
+        forward = directions[0]
         while forward is not None:
             print(forward)
             player.travel(forward)
