@@ -12,10 +12,10 @@ world = World()
 
 # You may uncomment the smaller graphs for development and testing purposes.
 # map_file = "maps/test_line.txt"
-# map_file = "maps/test_cross.txt"
-map_file = "maps/test_loop.txt"
+map_file = "maps/test_cross.txt"
+# map_file = "maps/test_loop.txt"
 # map_file = "maps/test_loop_fork.txt"
-#map_file = "maps/main_maze.txt"
+# map_file = "maps/main_maze.txt"
 
 # Loads the map into a dictionary
 room_graph=literal_eval(open(map_file, "r").read())
@@ -92,7 +92,6 @@ def find_shortest_path():
         
 
     path = []
-    #longest_direction = max(repeated_rooms, key=operator.itemgetter(1))[0]
     longest_direction = max(repeated_rooms.keys(), key=(lambda k: repeated_rooms[k]))
     for direction in paths:
         if direction == longest_direction:
@@ -101,9 +100,30 @@ def find_shortest_path():
     path += paths[longest_direction][:-repeated_rooms[direction]]
     return path
 
-traversal_path = find_shortest_path()
-print(traversal_path)
 
+opposite_direction = {"n": "s", "e": "w", "s": "n", "w": "e"}
+def find_path(graph=None, origin_direction=None):
+    if graph is None:
+        graph = {}
+    starting_room = player.current_room
+    if not starting_room in graph:
+        graph[starting_room] = {}
+    path = []
+    directions = player.current_room.get_exits()
+    for direction in [x for x in directions if not x in graph[starting_room]]:
+        player.travel(direction)
+        room = player.current_room
+        graph[starting_room][direction] = room
+        if not room in graph:
+            graph[room] = {}
+        graph[room][opposite_direction[direction]] = starting_room
+        path += [direction] + find_path(graph) + [opposite_direction[direction]]
+        player.travel(opposite_direction[direction])
+    return path
+
+#traversal_path = []
+traversal_path = find_path()
+print(traversal_path)
 
 
 # TRAVERSAL TEST
