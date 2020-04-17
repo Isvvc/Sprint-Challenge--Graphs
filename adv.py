@@ -27,6 +27,9 @@ world.print_rooms()
 player = Player(world.starting_room)
 
 opposite_direction = {"n": "s", "e": "w", "s": "n", "w": "e"}
+# Returns a tuple:
+#   0: the shortest route hitting every room
+#   1: the route to get back to the start from the ending room
 def find_path(graph=None):
     if graph is None:
         graph = {}
@@ -34,6 +37,8 @@ def find_path(graph=None):
     if not starting_room in graph:
         graph[starting_room] = {}
     path = []
+    paths = {}
+    backtrack = {}
     directions = player.current_room.get_exits()
     for direction in directions:
         if direction in graph[starting_room]:
@@ -48,14 +53,30 @@ def find_path(graph=None):
             graph[room] = {}
         graph[room][opposite_direction[direction]] = starting_room
         
-        path += [direction] + find_path(graph)
-        # If you've visited every room, we don't need to return to the center
-        if set([room.id for room in graph.keys()]) != set(world.rooms.keys()):
-            path += [opposite_direction[direction]]
-            player.travel(opposite_direction[direction])
-    return path
+        found_path = find_path(graph)
+        paths[direction] = [direction] + found_path[0]
+        backtrack[direction] = found_path[1] + [opposite_direction[direction]]
+        player.travel(opposite_direction[direction])
 
-traversal_path = find_path()
+    # Travel down all of the shorter routes first, backtracking to the start,
+    # then go down the longest route without backtracking since that's the end
+    if len(backtrack.keys()) > 0:
+        # Find the route with the longest backtrack
+        longest_direction = max(backtrack.keys(), key=(lambda k: backtrack[k]))
+        for direction in paths:
+            # Backtrack through all of the shorter routes
+            if direction == longest_direction:
+                continue
+            path += paths[direction]
+            if direction in backtrack:
+                path += backtrack[direction]
+        # Don't backtrack back the longest route
+        path += paths[longest_direction]
+        return (path, backtrack[longest_direction])
+
+    return (path, [])
+
+traversal_path = find_path()[0]
 #print(traversal_path)
 
 
