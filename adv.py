@@ -26,7 +26,7 @@ world.print_rooms()
 
 player = Player(world.starting_room)
 
-
+print(set(world.rooms.keys()))
 opposite_direction = {"n": "s", "e": "w", "s": "n", "w": "e"}
 def find_path(graph=None, origin_direction=None):
     if graph is None:
@@ -45,8 +45,11 @@ def find_path(graph=None, origin_direction=None):
         if not room in graph:
             graph[room] = {}
         graph[room][opposite_direction[direction]] = starting_room
-        path += [direction] + find_path(graph) + [opposite_direction[direction]]
-        player.travel(opposite_direction[direction])
+        path += [direction] + find_path(graph)
+        #print(set([room.id for room in graph.keys()]))
+        if set([room.id for room in graph.keys()]) != set(world.rooms.keys()):
+            path += [opposite_direction[direction]]
+            player.travel(opposite_direction[direction])
     return path
 
 traversal_path = find_path()
