@@ -26,9 +26,8 @@ world.print_rooms()
 
 player = Player(world.starting_room)
 
-print(set(world.rooms.keys()))
 opposite_direction = {"n": "s", "e": "w", "s": "n", "w": "e"}
-def find_path(graph=None, origin_direction=None):
+def find_path(graph=None):
     if graph is None:
         graph = {}
     starting_room = player.current_room
@@ -38,15 +37,19 @@ def find_path(graph=None, origin_direction=None):
     directions = player.current_room.get_exits()
     for direction in directions:
         if direction in graph[starting_room]:
+            # Skip if we've already been down this path
             continue
         player.travel(direction)
         room = player.current_room
+
+        # Add the connections to the graph both ways
         graph[starting_room][direction] = room
         if not room in graph:
             graph[room] = {}
         graph[room][opposite_direction[direction]] = starting_room
+        
         path += [direction] + find_path(graph)
-        #print(set([room.id for room in graph.keys()]))
+        # If you've visited every room, we don't need to return to the center
         if set([room.id for room in graph.keys()]) != set(world.rooms.keys()):
             path += [opposite_direction[direction]]
             player.travel(opposite_direction[direction])
